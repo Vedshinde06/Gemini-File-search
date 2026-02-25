@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HR Policy AI — PadCare Labs</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <style>
+    :root {
+      --red-primary: #C9161A;
+      --red-deep:    #AB0106;
+      --cream:       #FFF6EA;
+      --gray-light:  #CFCFCF;
+      --gray-mid:    #666666;
+      --peach:       #E68B7C;
+      --off-white:   #FCF8E6;
+      --gold:        #EFC147;
+      --pink:        #EDA1B0;
+      --forest:      #0E4B07;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      overflow: hidden;
+      position: relative;
+      padding: 16px;
+    }
+
+    /* Geometric background accent */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -120px; right: -120px;
+      width: 480px; height: 480px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,22,26,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -80px; left: -80px;
+      width: 360px; height: 360px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(239,193,71,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ---------- LAYOUT ---------- */
+
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      height: 100%;
+      display: flex;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+      margin: auto;
+    }
+
+    /* ---------- CHAT ---------- */
+
+    .chat {
+      flex: 2.2;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 40px rgba(171,1,6,0.10), 0 1px 4px rgba(0,0,0,0.06);
+      border: 1px solid rgba(201,22,26,0.10);
+      min-height: 0;
+    }
+
+    .header {
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--red-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      right: -30px; top: -30px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .header-logo {
+      height: 20px;
+      width: auto;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-logo img {
+      height: 20px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    .header-sub {
+      font-size: 11px;
+      color: rgba(255,246,234,0.75);
+      font-weight: 300;
+      margin-top: 1px;
+    }
+
+    .header-badge {
+      margin-left: auto;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    /* Messages */
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+      background: var(--off-white);
+      scroll-behavior: smooth;
+    }
+
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: var(--gray-light); border-radius: 99px; }
+
+    .msg {
+      margin-bottom: 18px;
+      max-width: 82%;
+      line-height: 1.7;
+      font-size: 14.5px;
+      animation: fadein 0.25s ease;
+    }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .user {
+      margin-left: auto;
+      background: var(--red-primary);
+      padding: 12px 16px;
+      border-radius: 16px 16px 4px 16px;
+      color: #fff;
+      font-weight: 400;
+      box-shadow: 0 2px 12px rgba(201,22,26,0.22);
+    }
+
+    .bot {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .bot-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--red-primary);
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .bot-avatar svg { width: 16px; height: 16px; }
+
+    .bot-content {
+      background: #fff;
+      padding: 14px 16px;
+      border-radius: 4px 16px 16px 16px;
+      border: 1px solid rgba(207,207,207,0.6);
+      color: #222;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+      flex: 1;
+    }
+
+    .bot-content h1, .bot-content h2, .bot-content h3 {
+      margin-top: 14px; margin-bottom: 6px;
+      color: var(--red-deep);
+      font-family: 'Playfair Display', serif;
+    }
+
+    .bot-content p { margin: 5px 0; }
+    .bot-content ul, .bot-content ol { padding-left: 20px; }
+    .bot-content li { margin: 3px 0; }
+    .bot-content strong { color: var(--red-deep); }
+
+    .bot-content table { border-collapse: collapse; margin-top: 8px; width: 100%; }
+    .bot-content td, .bot-content th { border: 1px solid var(--gray-light); padding: 6px 10px; }
+    .bot-content th { background: var(--cream); color: var(--red-deep); font-weight: 600; }
+
+    .bot-content code {
+      background: var(--cream);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--red-deep);
+    }
+
+    .bot-content pre {
+      background: #1e1e1e;
+      padding: 12px;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+
+    /* Welcome state */
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      opacity: 0.65;
+      gap: 8px;
+    }
+    .welcome-icon {
+      width: 52px; height: 52px;
+      background: var(--red-primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 6px;
+    }
+    .welcome h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 19px;
+      color: var(--red-deep);
+    }
+    .welcome p {
+      font-size: 13px;
+      color: var(--gray-mid);
+      max-width: 280px;
+    }
+
+    /* ---------- INPUT ---------- */
+
+    .input-area {
+      padding: 14px 16px;
+      background: #fff;
+      border-top: 1px solid rgba(207,207,207,0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .input-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: var(--off-white);
+      border: 1.5px solid var(--gray-light);
+      border-radius: 12px;
+      padding: 0 14px;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrap:focus-within {
+      border-color: var(--red-primary);
+      box-shadow: 0 0 0 3px rgba(201,22,26,0.08);
+    }
+
+    input {
+      flex: 1;
+      padding: 12px 0;
+      border: none;
+      background: transparent;
+      color: #222;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input::placeholder { color: var(--gray-mid); }
+
+    .send-btn {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: var(--red-primary);
+      color: white;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.18s, transform 0.1s;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover { background: var(--red-deep); }
+    .send-btn:active { transform: scale(0.94); }
+
+    /* ---------- ADMIN ---------- */
+
+    .admin {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .admin-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 4px 20px rgba(171,1,6,0.07), 0 1px 4px rgba(0,0,0,0.04);
+      border: 1px solid rgba(201,22,26,0.08);
+    }
+
+    .admin-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      color: var(--red-deep);
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .admin-label svg { width: 16px; height: 16px; }
+
+    .upload-zone {
+      border: 2px dashed rgba(201,22,26,0.3);
+      border-radius: 12px;
+      padding: 22px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--cream);
+    }
+
+    .upload-zone:hover {
+      border-color: var(--red-primary);
+      background: rgba(201,22,26,0.03);
+    }
+
+    .upload-zone-icon {
+      width: 38px; height: 38px;
+      margin: 0 auto 8px;
+      background: var(--red-primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .upload-zone p {
+      font-size: 12.5px;
+      color: var(--gray-mid);
+    }
+
+    .upload-zone strong {
+      color: var(--red-primary);
+    }
+
+    .progress-wrap {
+      height: 4px;
+      background: var(--gray-light);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--red-primary), var(--gold));
+      border-radius: 99px;
+      transition: width 0.2s;
+    }
+
+    .refresh-btn {
+      width: 100%;
+      padding: 9px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(201,22,26,0.2);
+      background: transparent;
+      color: var(--red-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px;
+      transition: all 0.18s;
+      margin-top: 2px;
+    }
+
+    .refresh-btn:hover {
+      background: var(--red-primary);
+      color: #fff;
+      border-color: var(--red-primary);
+    }
+
+    /* Docs list */
+
+    .docs-card {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .docs-scroll {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .docs-scroll::-webkit-scrollbar { width: 3px; }
+    .docs-scroll::-webkit-scrollbar-thumb { background: var(--gray-light); border-radius: 99px; }
+
+    .doc-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 10px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      background: var(--off-white);
+      border: 1px solid rgba(207,207,207,0.5);
+      transition: background 0.15s;
+    }
+
+    .doc-item:hover { background: var(--cream); }
+
+    .doc-icon {
+      width: 28px; height: 28px;
+      background: rgba(201,22,26,0.1);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .doc-name {
+      flex: 1;
+      font-size: 12.5px;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .del-btn {
+      width: 24px; height: 24px;
+      background: rgba(201,22,26,0.1);
+      border: none;
+      border-radius: 6px;
+      color: var(--red-primary);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .del-btn:hover {
+      background: var(--red-primary);
+      color: #fff;
+    }
+
+    .docs-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--gray-mid);
+      font-size: 12.5px;
+    }
+
+    /* Typing indicator */
+    .typing-dots {
+      display: flex; gap: 4px; align-items: center; padding: 4px 0;
+    }
+
+    .typing-dots span {
+      width: 7px; height: 7px;
+      background: var(--red-primary);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+      opacity: 0.6;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40%            { transform: translateY(-5px); opacity: 1; }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- CHAT -->
+  <div class="chat">
+    <div class="header">
+      <div class="header-logo">
+        <img src="padcare-logo.png" alt="PadCare Labs" />
+      </div>
+      <div>
+        <div class="header-title">HR Policy AI</div>
+        <div class="header-sub">PadCare Labs · Intelligent Policy Assistant</div>
+      </div>
+      <div class="header-badge">● Live</div>
+    </div>
+
+    <div id="messages" class="messages">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4M12 8h.01"/>
+          </svg>
+        </div>
+        <h2>Ask me anything about HR</h2>
+        <p>I can answer questions about company policies, benefits, leave, and more.</p>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <input id="q" placeholder="Type your HR policy question…" />
+      </div>
+      <button class="send-btn" onclick="send()" title="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="admin">
+
+    <!-- Upload card -->
+    <div class="admin-card">
+      <div class="admin-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Upload Document
+      </div>
+
+      <div class="upload-zone" onclick="fileInput.click()">
+        <div class="upload-zone-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <p><strong>Click to upload</strong></p>
+        <p>PDF, DOCX, TXT supported</p>
+      </div>
+
+      <div class="progress-wrap"><div id="bar" class="bar"></div></div>
+
+      <input type="file" id="fileInput" hidden>
+
+      <button class="refresh-btn" onclick="loadDocs()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh Documents
+      </button>
+    </div>
+
+    <!-- Docs list card -->
+    <div class="admin-card docs-card">
+      <div class="admin-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        </svg>
+        Policy Documents
+      </div>
+
+      <div class="docs-scroll" id="docs">
+        <div class="docs-empty">No documents loaded yet.</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const CHAT_API  = "http://127.0.0.1:8000/chat-stream";
+const UPLOAD_API = "http://127.0.0.1:8000/admin/upload";
+const DOCS_API   = "http://127.0.0.1:8000/admin/docs";
+
+const messagesEl = document.getElementById("messages");
+const inputEl    = document.getElementById("q");
+const fileInput  = document.getElementById("fileInput");
+const welcome    = document.getElementById("welcome");
+
+/* ---- CHAT ---- */
+
+function hideWelcome() {
+  if (welcome) welcome.style.display = "none";
+}
+
+function addUser(text) {
+  hideWelcome();
+  const d = document.createElement("div");
+  d.className = "msg user";
+  d.textContent = text;
+  messagesEl.appendChild(d);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addBot() {
+  const wrap = document.createElement("div");
+  wrap.className = "msg bot";
+
+  const avatar = document.createElement("div");
+  avatar.className = "bot-avatar";
+  avatar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+
+  const inner = document.createElement("div");
+  inner.className = "bot-content";
+
+  const dots = document.createElement("div");
+  dots.className = "typing-dots";
+  dots.innerHTML = "<span></span><span></span><span></span>";
+  inner.appendChild(dots);
+
+  wrap.appendChild(avatar);
+  wrap.appendChild(inner);
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  return { inner, dots };
+}
+
+async function send() {
+  const q = inputEl.value.trim();
+  if (!q) return;
+
+  addUser(q);
+  inputEl.value = "";
+
+  const { inner, dots } = addBot();
+
+  const fd = new FormData();
+  fd.append("question", q);
+
+  const res = await fetch(CHAT_API, { method: "POST", body: fd });
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+
+  let txt = "";
+  let first = true;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (first) { dots.remove(); first = false; }
+    txt += dec.decode(value);
+    inner.innerHTML = marked.parse(txt);
+    document.querySelectorAll("pre code").forEach(el => hljs.highlightElement(el));
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+}
+
+inputEl.addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); send(); }
+});
+
+/* ---- UPLOAD ---- */
+
+fileInput.onchange = () => {
+  const f = fileInput.files[0];
+  if (!f) return;
+
+  const xhr = new XMLHttpRequest();
+  const fd  = new FormData();
+  fd.append("file", f);
+
+  const bar = document.getElementById("bar");
+
+  xhr.upload.onprogress = e => {
+    if (e.lengthComputable) bar.style.width = (e.loaded / e.total * 100) + "%";
+  };
+
+  xhr.onload = () => {
+    bar.style.width = "0%";
+    loadDocs();
+  };
+
+  xhr.open("POST", UPLOAD_API);
+  xhr.send(fd);
+};
+
+/* ---- DOCS ---- */
+
+async function loadDocs() {
+  const d = document.getElementById("docs");
+  d.innerHTML = `<div class="docs-empty">Loading…</div>`;
+
+  const res  = await fetch(DOCS_API);
+  const data = await res.json();
+
+  if (!data.documents || data.documents.length === 0) {
+    d.innerHTML = `<div class="docs-empty">No documents uploaded yet.</div>`;
+    return;
+  }
+
+  d.innerHTML = "";
+
+  data.documents.forEach(x => {
+    const item = document.createElement("div");
+    item.className = "doc-item";
+
+    item.innerHTML = `
+      <div class="doc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </div>
+      <span class="doc-name" title="${x.display_name}">${x.display_name}</span>
+    `;
+
+    const btn = document.createElement("button");
+    btn.className = "del-btn";
+    btn.title = "Delete";
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
+    btn.onclick = () => deleteDoc(x.name);
+
+    item.appendChild(btn);
+    d.appendChild(item);
+  });
+}
+
+async function deleteDoc(id) {
+  if (!confirm("Delete this document?")) return;
+  await fetch(`${DOCS_API}/${id}`, { method: "DELETE" });
+  loadDocs();
+}
+
+loadDocs();
+
+</script>
+</body>
+</html>
