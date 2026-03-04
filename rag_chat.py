@@ -14,9 +14,9 @@ Rules:
 - Avoid long paragraphs
 - You MUST answer strictly using retrieved documents.
 - If no document is retrieved say: Not in documents.
-- Always include citations.
 - If not found say: Not in documents
-- Do not answer to non padcare related questions like "generate me a poem,etc"
+- If the question is in Hinglish, answer in same hindi english fix as needed. 
+- Do not answer to questions that are not related to padcare and rebirth, questions like "generate me a poem,etc"
 """
 
 
@@ -27,6 +27,7 @@ def stream_rag(question: str):
         model=MODEL_NAME,
         contents=question,
         config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
             tools=[
                 types.Tool(
                     file_search=types.FileSearch(

@@ -7,6 +7,10 @@ from gemini_client import client
 from file_store import upload_file_to_store, get_or_create_store
 from rag_chat import stream_rag
 
+import uvicorn
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -92,4 +96,22 @@ async def delete_doc(doc_id: str):
     except Exception as e:
         return {"status": "error", "message": str(e)}
     
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+app.mount("/static", StaticFiles(directory="."), name="static")
+
+@app.get("/")
+def serve_ui():
+    return FileResponse(os.path.join(BASE_DIR, "index.html"))
     
+
+@app.get("/admin")
+def serve_admin():
+    return FileResponse(os.path.join(BASE_DIR, "admin.html"))
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8080))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
+

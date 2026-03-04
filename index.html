@@ -1,787 +1,747 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>HR Policy AI — PadCare Labs</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Policy Assistant — PadCare Labs</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
   <style>
+    /*
+      PADCARE LABS — BRAND COLORS ONLY
+      Primary:   #C9161A  #AB0106  #FFF6EA  #CFCFCF  #666666
+      Secondary: #E68B7C  #FCF8E6  #EFC147  #EDA1B0  #0E4B07
+    */
+
     :root {
-      --red-primary: #C9161A;
-      --red-deep:    #AB0106;
-      --cream:       #FFF6EA;
-      --gray-light:  #CFCFCF;
-      --gray-mid:    #666666;
-      --peach:       #E68B7C;
-      --off-white:   #FCF8E6;
-      --gold:        #EFC147;
-      --pink:        #EDA1B0;
-      --forest:      #0E4B07;
+      --red:          #C9161A;
+      --red-deep:     #AB0106;
+      --cream:        #FFF6EA;
+      --gray-light:   #CFCFCF;
+      --gray-mid:     #666666;
+      --peach:        #E68B7C;
+      --white:        #FCF8E6;
+      --gold:         #EFC147;
+      --pink:         #EDA1B0;
+      --forest:       #0E4B07;
+
+      /* Semantic tokens — all derived from brand palette */
+      --bg:           var(--cream);
+      --surface:      var(--white);
+      --border:       var(--gray-light);
+      --border-soft:  rgba(207,207,207,0.45);
+      --text:         #1c1c1c;
+      --text-sub:     var(--gray-mid);
+      --text-muted:   var(--gray-light);
+      --red-glow:     rgba(201,22,26,0.09);
+      --gold-tint:    rgba(239,193,71,0.15);
+      --radius:       14px;
+      --radius-sm:    8px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      height: 100%;
-      width: 100%;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; overflow: hidden; }
 
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--cream);
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-      overflow: hidden;
-      position: relative;
-      padding: 16px;
-    }
-
-    /* Geometric background accent */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -120px; right: -120px;
-      width: 480px; height: 480px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(201,22,26,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -80px; left: -80px;
-      width: 360px; height: 360px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(239,193,71,0.15) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    /* ---------- LAYOUT ---------- */
-
-    .app {
-      width: 100%;
-      max-width: 1200px;
-      height: 100%;
-      display: flex;
-      gap: 16px;
-      position: relative;
-      z-index: 1;
-      margin: auto;
-    }
-
-    /* ---------- CHAT ---------- */
-
-    .chat {
-      flex: 2.2;
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
       flex-direction: column;
-      background: #fff;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 40px rgba(171,1,6,0.10), 0 1px 4px rgba(0,0,0,0.06);
-      border: 1px solid rgba(201,22,26,0.10);
-      min-height: 0;
     }
 
-    .header {
-      padding: 18px 24px;
+    /* ── TOPBAR ─────────────────────────────────── */
+
+    .topbar {
+      height: 58px;
+      background: var(--red);
       display: flex;
       align-items: center;
-      gap: 14px;
-      background: var(--red-primary);
+      padding: 0 24px;
+      gap: 16px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 14px rgba(171,1,6,0.22);
       position: relative;
-      overflow: hidden;
+      z-index: 10;
     }
 
-    .header::after {
+    /* Subtle decorative stripe on topbar */
+    .topbar::after {
       content: '';
       position: absolute;
-      right: -30px; top: -30px;
-      width: 120px; height: 120px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.07);
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--red-deep), var(--gold), var(--red-deep));
+      opacity: 0.6;
     }
 
-    .header-logo {
-      height: 20px;
-      width: auto;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-    }
-
-    .header-logo img {
-      height: 20px;
+    .topbar-logo {
+      height: 34px;
       width: auto;
       object-fit: contain;
     }
 
-    .header-title {
-      font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      font-size: 20px;
-      color: #fff;
-      letter-spacing: 0.3px;
+    .topbar-divider {
+      width: 1px;
+      height: 24px;
+      background: rgba(255,246,234,0.28);
     }
 
-    .header-sub {
-      font-size: 11px;
-      color: rgba(255,246,234,0.75);
-      font-weight: 300;
-      margin-top: 1px;
+    .topbar-title {
+      font-family: 'Lora', serif;
+      font-size: 15.5px;
+      font-weight: 600;
+      color: var(--cream);
     }
 
-    .header-badge {
+    .topbar-live {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       margin-left: auto;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
-      color: #fff;
-      font-size: 10px;
-      padding: 3px 9px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      font-weight: 500;
+      font-size: 11.5px;
+      color: rgba(255,246,234,0.65);
     }
 
-    /* Messages */
+    .topbar-live .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 7px rgba(239,193,71,0.7);
+      animation: livepulse 2.2s infinite;
+    }
+
+    @keyframes livepulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.35; }
+    }
+
+    .admin-link {
+      margin-left: 14px;
+      padding: 6px 13px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255,246,234,0.3);
+      background: rgba(255,246,234,0.08);
+      color: var(--cream);
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.18s;
+    }
+
+    .admin-link:hover {
+      background: rgba(255,246,234,0.18);
+      border-color: rgba(255,246,234,0.55);
+    }
+
+    /* ── LAYOUT ─────────────────────────────────── */
+
+    .main { flex: 1; display: flex; overflow: hidden; }
+
+    .chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── MESSAGES ───────────────────────────────── */
 
     .messages {
       flex: 1;
       overflow-y: auto;
-      padding: 24px 20px;
-      background: var(--off-white);
+      padding: 30px 0 16px;
       scroll-behavior: smooth;
     }
 
     .messages::-webkit-scrollbar { width: 4px; }
-    .messages::-webkit-scrollbar-track { background: transparent; }
     .messages::-webkit-scrollbar-thumb { background: var(--gray-light); border-radius: 99px; }
 
-    .msg {
-      margin-bottom: 18px;
-      max-width: 82%;
-      line-height: 1.7;
-      font-size: 14.5px;
-      animation: fadein 0.25s ease;
+    .msg-row {
+      max-width: 800px;
+      margin: 0 auto 6px;
+      padding: 0 28px;
+      animation: msgIn 0.22s ease;
     }
 
-    @keyframes fadein {
+    @keyframes msgIn {
       from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .user {
-      margin-left: auto;
-      background: var(--red-primary);
-      padding: 12px 16px;
-      border-radius: 16px 16px 4px 16px;
-      color: #fff;
-      font-weight: 400;
-      box-shadow: 0 2px 12px rgba(201,22,26,0.22);
-    }
+    /* User */
+    .user-row { display: flex; justify-content: flex-end; }
 
-    .bot {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .bot-avatar {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      background: var(--red-primary);
-      flex-shrink: 0;
-      margin-top: 2px;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .bot-avatar svg { width: 16px; height: 16px; }
-
-    .bot-content {
-      background: #fff;
-      padding: 14px 16px;
-      border-radius: 4px 16px 16px 16px;
-      border: 1px solid rgba(207,207,207,0.6);
-      color: #222;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
-      flex: 1;
-    }
-
-    .bot-content h1, .bot-content h2, .bot-content h3 {
-      margin-top: 14px; margin-bottom: 6px;
-      color: var(--red-deep);
-      font-family: 'Playfair Display', serif;
-    }
-
-    .bot-content p { margin: 5px 0; }
-    .bot-content ul, .bot-content ol { padding-left: 20px; }
-    .bot-content li { margin: 3px 0; }
-    .bot-content strong { color: var(--red-deep); }
-
-    .bot-content table { border-collapse: collapse; margin-top: 8px; width: 100%; }
-    .bot-content td, .bot-content th { border: 1px solid var(--gray-light); padding: 6px 10px; }
-    .bot-content th { background: var(--cream); color: var(--red-deep); font-weight: 600; }
-
-    .bot-content code {
-      background: var(--cream);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 13px;
-      color: var(--red-deep);
-    }
-
-    .bot-content pre {
-      background: #1e1e1e;
-      padding: 12px;
-      border-radius: 10px;
-      overflow-x: auto;
-    }
-
-    /* Welcome state */
-    .welcome {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      text-align: center;
-      opacity: 0.65;
-      gap: 8px;
-    }
-    .welcome-icon {
-      width: 52px; height: 52px;
-      background: var(--red-primary);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 6px;
-    }
-    .welcome h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 19px;
-      color: var(--red-deep);
-    }
-    .welcome p {
-      font-size: 13px;
-      color: var(--gray-mid);
-      max-width: 280px;
-    }
-
-    /* ---------- INPUT ---------- */
-
-    .input-area {
-      padding: 14px 16px;
-      background: #fff;
-      border-top: 1px solid rgba(207,207,207,0.5);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .input-wrap {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      background: var(--off-white);
-      border: 1.5px solid var(--gray-light);
-      border-radius: 12px;
-      padding: 0 14px;
-      transition: border-color 0.2s;
-    }
-
-    .input-wrap:focus-within {
-      border-color: var(--red-primary);
-      box-shadow: 0 0 0 3px rgba(201,22,26,0.08);
-    }
-
-    input {
-      flex: 1;
-      padding: 12px 0;
-      border: none;
-      background: transparent;
-      color: #222;
-      font-family: 'DM Sans', sans-serif;
+    .user-bubble {
+      background: var(--red);
+      color: var(--cream);
+      padding: 11px 17px;
+      border-radius: 18px 18px 4px 18px;
       font-size: 14px;
-      outline: none;
+      line-height: 1.65;
+      max-width: 70%;
+      box-shadow: 0 2px 14px rgba(201,22,26,0.22);
     }
 
-    input::placeholder { color: var(--gray-mid); }
+    /* Bot */
+    .bot-row { display: flex; gap: 12px; align-items: flex-start; }
+
+    .bot-icon {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--red);
+      flex-shrink: 0;
+      margin-top: 3px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(201,22,26,0.22);
+    }
+
+    .bot-icon svg { width: 15px; height: 15px; }
+
+    .bot-bubble {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px 18px 18px 18px;
+      padding: 14px 18px;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text);
+      max-width: calc(100% - 44px);
+      box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+    }
+
+    /* Markdown */
+    .bot-bubble h1, .bot-bubble h2, .bot-bubble h3 {
+      font-family: 'Lora', serif;
+      color: var(--red-deep);
+      margin: 14px 0 6px;
+    }
+    .bot-bubble h1 { font-size: 17px; }
+    .bot-bubble h2 { font-size: 15.5px; }
+    .bot-bubble h3 { font-size: 14.5px; }
+    .bot-bubble p  { margin: 6px 0; }
+    .bot-bubble ul, .bot-bubble ol { padding-left: 20px; margin: 6px 0; }
+    .bot-bubble li  { margin: 3px 0; }
+    .bot-bubble strong { color: var(--red-deep); font-weight: 600; }
+    .bot-bubble em     { color: var(--peach); }
+    .bot-bubble a      { color: var(--red); }
+
+    .bot-bubble table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 13px; }
+    .bot-bubble th {
+      background: var(--red-glow);
+      color: var(--red-deep);
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
+      border: 1px solid var(--border);
+    }
+    .bot-bubble td {
+      padding: 7px 12px;
+      border: 1px solid var(--border-soft);
+      color: var(--text-sub);
+    }
+    .bot-bubble tr:nth-child(even) td { background: var(--cream); }
+
+    .bot-bubble code {
+      background: var(--cream);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 12.5px;
+      color: var(--red-deep);
+      border: 1px solid var(--border-soft);
+      font-family: 'Courier New', monospace;
+    }
+
+    .bot-bubble pre {
+      background: #1a1a1a;
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+
+    .bot-bubble pre code {
+      background: transparent;
+      border: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* Sources */
+    .sources-block {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-soft);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .sources-label {
+      font-size: 10.5px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+      width: 100%;
+      margin-bottom: 4px;
+    }
+
+    .source-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      background: var(--red-glow);
+      border: 1px solid rgba(201,22,26,0.16);
+      border-radius: 20px;
+      font-size: 11.5px;
+      color: var(--red-deep);
+    }
+
+    .source-chip svg { width: 11px; height: 11px; }
+
+    /* Typing dots */
+    .typing { display: flex; gap: 5px; align-items: center; padding: 5px 2px; }
+
+    .typing span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gray-light);
+      animation: tdot 1.3s infinite;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes tdot {
+      0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+      40%            { transform: scale(1); opacity: 1; background: var(--red); }
+    }
+
+    /* ── ONBOARDING ─────────────────────────────── */
+
+    #onboarding {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 28px 32px;
+    }
+
+    .ob-header { margin-bottom: 24px; }
+
+    .ob-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: var(--red-glow);
+      border: 1px solid rgba(201,22,26,0.18);
+      border-radius: 20px;
+      font-size: 10.5px;
+      color: var(--red);
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .ob-title {
+      font-family: 'Lora', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--red-deep);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .ob-subtitle {
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.65;
+      max-width: 520px;
+    }
+
+    .ob-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .ob-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      transition: box-shadow 0.2s;
+    }
+
+    .ob-card:hover {
+      box-shadow: 0 4px 16px rgba(201,22,26,0.08);
+    }
+
+    .ob-card-icon {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .ic-red    { background: var(--red-glow); }
+    .ic-gold   { background: var(--gold-tint); }
+    .ic-peach  { background: rgba(230,139,124,0.12); }
+    .ic-forest { background: rgba(14,75,7,0.10); }
+
+    .ob-card h4 {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .ob-card ul { list-style: none; padding: 0; }
+
+    .ob-card ul li {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.55;
+      padding: 2px 0;
+      display: flex;
+      gap: 6px;
+    }
+
+    .ob-card ul li::before {
+      content: '–';
+      color: var(--gray-light);
+      flex-shrink: 0;
+    }
+
+    .ob-starters-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-sub);
+      margin-bottom: 10px;
+    }
+
+    .ob-starters { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .starter-chip {
+      padding: 8px 15px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12.5px;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: 'Sora', sans-serif;
+    }
+
+    .starter-chip:hover {
+      background: var(--red-glow);
+      border-color: rgba(201,22,26,0.25);
+      color: var(--red-deep);
+    }
+
+    /* ── INPUT BAR ──────────────────────────────── */
+
+    .input-bar {
+      flex-shrink: 0;
+      padding: 14px 28px 20px;
+      background: linear-gradient(to top, var(--cream) 65%, rgba(255,246,234,0));
+    }
+
+    .input-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 6px 6px 6px 18px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+
+    .input-inner:focus-within {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px var(--red-glow), 0 2px 12px rgba(0,0,0,0.05);
+    }
+
+    .input-inner input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      padding: 8px 0;
+    }
+
+    .input-inner input::placeholder { color: var(--gray-light); }
 
     .send-btn {
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      border: none;
-      background: var(--red-primary);
-      color: white;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.18s, transform 0.1s;
-      flex-shrink: 0;
-    }
-
-    .send-btn:hover { background: var(--red-deep); }
-    .send-btn:active { transform: scale(0.94); }
-
-    /* ---------- ADMIN ---------- */
-
-    .admin {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      min-height: 0;
-    }
-
-    .admin-card {
-      background: #fff;
-      border-radius: 20px;
-      padding: 18px;
-      box-shadow: 0 4px 20px rgba(171,1,6,0.07), 0 1px 4px rgba(0,0,0,0.04);
-      border: 1px solid rgba(201,22,26,0.08);
-    }
-
-    .admin-label {
-      font-family: 'Playfair Display', serif;
-      font-size: 14px;
-      color: var(--red-deep);
-      font-weight: 700;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .admin-label svg { width: 16px; height: 16px; }
-
-    .upload-zone {
-      border: 2px dashed rgba(201,22,26,0.3);
-      border-radius: 12px;
-      padding: 22px 14px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: var(--cream);
-    }
-
-    .upload-zone:hover {
-      border-color: var(--red-primary);
-      background: rgba(201,22,26,0.03);
-    }
-
-    .upload-zone-icon {
       width: 38px; height: 38px;
-      margin: 0 auto 8px;
-      background: var(--red-primary);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .upload-zone p {
-      font-size: 12.5px;
-      color: var(--gray-mid);
-    }
-
-    .upload-zone strong {
-      color: var(--red-primary);
-    }
-
-    .progress-wrap {
-      height: 4px;
-      background: var(--gray-light);
-      border-radius: 99px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    .bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--red-primary), var(--gold));
-      border-radius: 99px;
-      transition: width 0.2s;
-    }
-
-    .refresh-btn {
-      width: 100%;
-      padding: 9px;
       border-radius: 10px;
-      border: 1.5px solid rgba(201,22,26,0.2);
-      background: transparent;
-      color: var(--red-primary);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      gap: 6px;
-      transition: all 0.18s;
-      margin-top: 2px;
-    }
-
-    .refresh-btn:hover {
-      background: var(--red-primary);
-      color: #fff;
-      border-color: var(--red-primary);
-    }
-
-    /* Docs list */
-
-    .docs-card {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .docs-scroll {
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .docs-scroll::-webkit-scrollbar { width: 3px; }
-    .docs-scroll::-webkit-scrollbar-thumb { background: var(--gray-light); border-radius: 99px; }
-
-    .doc-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 10px;
-      border-radius: 10px;
-      margin-bottom: 6px;
-      background: var(--off-white);
-      border: 1px solid rgba(207,207,207,0.5);
-      transition: background 0.15s;
-    }
-
-    .doc-item:hover { background: var(--cream); }
-
-    .doc-icon {
-      width: 28px; height: 28px;
-      background: rgba(201,22,26,0.1);
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .doc-name {
-      flex: 1;
-      font-size: 12.5px;
-      color: #333;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .del-btn {
-      width: 24px; height: 24px;
-      background: rgba(201,22,26,0.1);
       border: none;
-      border-radius: 6px;
-      color: var(--red-primary);
-      cursor: pointer;
+      background: var(--red);
+      color: var(--cream);
       display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
       flex-shrink: 0;
-      transition: all 0.15s;
+      transition: background 0.18s, transform 0.1s;
+      box-shadow: 0 2px 8px rgba(201,22,26,0.28);
     }
 
-    .del-btn:hover {
-      background: var(--red-primary);
-      color: #fff;
-    }
+    .send-btn:hover  { background: var(--red-deep); }
+    .send-btn:active { transform: scale(0.93); }
 
-    .docs-empty {
+    .input-hint {
+      max-width: 800px;
+      margin: 8px auto 0;
+      font-size: 11px;
+      color: var(--gray-light);
       text-align: center;
-      padding: 24px;
-      color: var(--gray-mid);
-      font-size: 12.5px;
-    }
-
-    /* Typing indicator */
-    .typing-dots {
-      display: flex; gap: 4px; align-items: center; padding: 4px 0;
-    }
-
-    .typing-dots span {
-      width: 7px; height: 7px;
-      background: var(--red-primary);
-      border-radius: 50%;
-      animation: bounce 1.2s infinite;
-      opacity: 0.6;
-    }
-
-    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); }
-      40%            { transform: translateY(-5px); opacity: 1; }
     }
   </style>
 </head>
-
 <body>
 
-<div class="app">
-
-  <!-- CHAT -->
-  <div class="chat">
-    <div class="header">
-      <div class="header-logo">
-        <img src="padcare-logo.png" alt="PadCare Labs" />
-      </div>
-      <div>
-        <div class="header-title">HR Policy AI</div>
-        <div class="header-sub">PadCare Labs · Intelligent Policy Assistant</div>
-      </div>
-      <div class="header-badge">● Live</div>
-    </div>
-
-    <div id="messages" class="messages">
-      <div class="welcome" id="welcome">
-        <div class="welcome-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 16v-4M12 8h.01"/>
-          </svg>
-        </div>
-        <h2>Ask me anything about HR</h2>
-        <p>I can answer questions about company policies, benefits, leave, and more.</p>
-      </div>
-    </div>
-
-    <div class="input-area">
-      <div class="input-wrap">
-        <input id="q" placeholder="Type your HR policy question…" />
-      </div>
-      <button class="send-btn" onclick="send()" title="Send">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
-    </div>
+<div class="topbar">
+  <img src="/static/padcare-logo.png" alt="PadCare Labs" class="topbar-logo" />
+  <div class="topbar-divider"></div>
+  <span class="topbar-title">HR Policy Assistant</span>
+  <div class="topbar-live">
+    <span class="dot"></span>
+    Online
   </div>
+  <!-- <a href="/admin" class="admin-link">Admin Panel →</a> -->
+</div>
 
-  <!-- ADMIN -->
-  <div class="admin">
+<div class="main">
+  <div class="chat-area">
 
-    <!-- Upload card -->
-    <div class="admin-card">
-      <div class="admin-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-        Upload Document
-      </div>
+    <div class="messages" id="messages">
+      <div id="onboarding">
 
-      <div class="upload-zone" onclick="fileInput.click()">
-        <div class="upload-zone-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
+        <div class="ob-header">
+          <div class="ob-tag">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            HR Policy AI
+          </div>
+          <h1 class="ob-title">Your official HR policy<br>assistant at PadCare Labs.</h1>
+          <p class="ob-subtitle">Ask any HR policy question and get accurate, document-grounded answers instantly. All responses come directly from official HR documents.</p>
         </div>
-        <p><strong>Click to upload</strong></p>
-        <p>PDF, DOCX, TXT supported</p>
+
+        <div class="ob-cards">
+          <div class="ob-card">
+            <div class="ob-card-icon ic-forest">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E4B07" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h4>What I can help with</h4>
+            <ul>
+              <li>Leave policies &amp; eligibility rules</li>
+              <li>Leave carry forward rules</li>
+              <li>Company holidays &amp; calendar</li>
+              <li>Leave encashment process</li>
+              <li>HR policy clarifications</li>
+            </ul>
+          </div>
+
+          <div class="ob-card">
+            <div class="ob-card-icon ic-red">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9161A" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <h4>What I cannot help with</h4>
+            <ul>
+              <li>Personal HR approvals or decisions</li>
+              <li>Salary or personal employee data</li>
+              <li>Non-HR topics</li>
+              <li>Questions outside official docs</li>
+            </ul>
+          </div>
+
+          <div class="ob-card">
+            <div class="ob-card-icon ic-gold">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EFC147" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            </div>
+            <h4>How answers work</h4>
+            <ul>
+              <li>Grounded in uploaded HR documents</li>
+              <li>Shows source document per answer</li>
+              <li>Doc-only — no hallucinations</li>
+              <li>Structured, readable responses</li>
+            </ul>
+          </div>
+
+          <div class="ob-card">
+            <div class="ob-card-icon ic-peach">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E68B7C" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h4>Tips for better answers</h4>
+            <ul>
+              <li>Be specific — mention the policy name</li>
+              <li>State your role/grade if relevant</li>
+              <li>Ask one question at a time</li>
+              <li>Avoid vague or general queries</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="ob-starters-label">Try asking</div>
+        <div class="ob-starters">
+          <button class="starter-chip" onclick="askStarter(this)">How many leaves do employees get?</button>
+          <button class="starter-chip" onclick="askStarter(this)">What is the leave carry forward policy?</button>
+          <button class="starter-chip" onclick="askStarter(this)">Are interns eligible for leave?</button>
+          <button class="starter-chip" onclick="askStarter(this)">What are company holidays?</button>
+          <button class="starter-chip" onclick="askStarter(this)">How does leave encashment work?</button>
+        </div>
+
       </div>
-
-      <div class="progress-wrap"><div id="bar" class="bar"></div></div>
-
-      <input type="file" id="fileInput" hidden>
-
-      <button class="refresh-btn" onclick="loadDocs()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-        </svg>
-        Refresh Documents
-      </button>
     </div>
 
-    <!-- Docs list card -->
-    <div class="admin-card docs-card">
-      <div class="admin-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-        </svg>
-        Policy Documents
+    <div class="input-bar">
+      <div class="input-inner">
+        <input id="q" placeholder="Ask an HR policy question…" autocomplete="off" />
+        <button class="send-btn" id="sendBtn" onclick="send()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFF6EA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
       </div>
-
-      <div class="docs-scroll" id="docs">
-        <div class="docs-empty">No documents loaded yet.</div>
-      </div>
+      <div class="input-hint">Answers are based solely on official PadCare Labs HR documents.</div>
     </div>
 
   </div>
-
 </div>
 
 <script>
+  const CHAT_API = "/chat-stream";
 
-const CHAT_API  = "http://127.0.0.1:8000/chat-stream";
-const UPLOAD_API = "http://127.0.0.1:8000/admin/upload";
-const DOCS_API   = "http://127.0.0.1:8000/admin/docs";
+  const messagesEl = document.getElementById("messages");
+  const inputEl    = document.getElementById("q");
+  const sendBtn    = document.getElementById("sendBtn");
+  let   onboarding = document.getElementById("onboarding");
+  let   obVisible  = true;
 
-const messagesEl = document.getElementById("messages");
-const inputEl    = document.getElementById("q");
-const fileInput  = document.getElementById("fileInput");
-const welcome    = document.getElementById("welcome");
+  function hideOnboarding() {
+    if (!obVisible) return;
+    obVisible = false;
+    onboarding.style.transition = "opacity 0.3s, transform 0.3s";
+    onboarding.style.opacity    = "0";
+    onboarding.style.transform  = "translateY(-10px)";
+    setTimeout(() => onboarding.remove(), 320);
+  }
 
-/* ---- CHAT ---- */
+  function askStarter(btn) { inputEl.value = btn.textContent.trim(); send(); }
 
-function hideWelcome() {
-  if (welcome) welcome.style.display = "none";
-}
+  function esc(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-function addUser(text) {
-  hideWelcome();
-  const d = document.createElement("div");
-  d.className = "msg user";
-  d.textContent = text;
-  messagesEl.appendChild(d);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-function addBot() {
-  const wrap = document.createElement("div");
-  wrap.className = "msg bot";
-
-  const avatar = document.createElement("div");
-  avatar.className = "bot-avatar";
-  avatar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
-
-  const inner = document.createElement("div");
-  inner.className = "bot-content";
-
-  const dots = document.createElement("div");
-  dots.className = "typing-dots";
-  dots.innerHTML = "<span></span><span></span><span></span>";
-  inner.appendChild(dots);
-
-  wrap.appendChild(avatar);
-  wrap.appendChild(inner);
-  messagesEl.appendChild(wrap);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-
-  return { inner, dots };
-}
-
-async function send() {
-  const q = inputEl.value.trim();
-  if (!q) return;
-
-  addUser(q);
-  inputEl.value = "";
-
-  const { inner, dots } = addBot();
-
-  const fd = new FormData();
-  fd.append("question", q);
-
-  const res = await fetch(CHAT_API, { method: "POST", body: fd });
-  const reader = res.body.getReader();
-  const dec = new TextDecoder();
-
-  let txt = "";
-  let first = true;
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (first) { dots.remove(); first = false; }
-    txt += dec.decode(value);
-    inner.innerHTML = marked.parse(txt);
-    document.querySelectorAll("pre code").forEach(el => hljs.highlightElement(el));
+  function addUser(text) {
+    hideOnboarding();
+    const r = document.createElement("div");
+    r.className = "msg-row user-row";
+    r.innerHTML = `<div class="user-bubble">${esc(text)}</div>`;
+    messagesEl.appendChild(r);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
-}
 
-inputEl.addEventListener("keydown", e => {
-  if (e.key === "Enter") { e.preventDefault(); send(); }
-});
-
-/* ---- UPLOAD ---- */
-
-fileInput.onchange = () => {
-  const f = fileInput.files[0];
-  if (!f) return;
-
-  const xhr = new XMLHttpRequest();
-  const fd  = new FormData();
-  fd.append("file", f);
-
-  const bar = document.getElementById("bar");
-
-  xhr.upload.onprogress = e => {
-    if (e.lengthComputable) bar.style.width = (e.loaded / e.total * 100) + "%";
-  };
-
-  xhr.onload = () => {
-    bar.style.width = "0%";
-    loadDocs();
-  };
-
-  xhr.open("POST", UPLOAD_API);
-  xhr.send(fd);
-};
-
-/* ---- DOCS ---- */
-
-async function loadDocs() {
-  const d = document.getElementById("docs");
-  d.innerHTML = `<div class="docs-empty">Loading…</div>`;
-
-  const res  = await fetch(DOCS_API);
-  const data = await res.json();
-
-  if (!data.documents || data.documents.length === 0) {
-    d.innerHTML = `<div class="docs-empty">No documents uploaded yet.</div>`;
-    return;
+  function addBot() {
+    const r = document.createElement("div");
+    r.className = "msg-row";
+    r.innerHTML = `
+      <div class="bot-row">
+        <div class="bot-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#FFF6EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="bot-bubble" id="bba">
+          <div class="typing"><span></span><span></span><span></span></div>
+        </div>
+      </div>`;
+    messagesEl.appendChild(r);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    const b = document.getElementById("bba");
+    b.removeAttribute("id");
+    return b;
   }
 
-  d.innerHTML = "";
+  function extractSources(text) {
+    const lines = text.split("\n"), srcs = [], clean = [];
+    let inS = false;
+    for (const l of lines) {
+      if (/^#+\s*(sources?|references?|documents?)/i.test(l.trim())) { inS = true; continue; }
+      if (inS && /^[-*]\s+.+/.test(l.trim())) { srcs.push(l.replace(/^[-*]\s+/,"").trim()); }
+      else { inS = false; clean.push(l); }
+    }
+    return { cleaned: clean.join("\n"), sources: srcs };
+  }
 
-  data.documents.forEach(x => {
-    const item = document.createElement("div");
-    item.className = "doc-item";
+  async function send() {
+    const q = inputEl.value.trim();
+    if (!q) return;
+    addUser(q);
+    inputEl.value = "";
+    sendBtn.disabled = true;
 
-    item.innerHTML = `
-      <div class="doc-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-        </svg>
-      </div>
-      <span class="doc-name" title="${x.display_name}">${x.display_name}</span>
-    `;
+    const bubble = addBot();
+    const fd = new FormData();
+    fd.append("question", q);
 
-    const btn = document.createElement("button");
-    btn.className = "del-btn";
-    btn.title = "Delete";
-    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
-    btn.onclick = () => deleteDoc(x.name);
+    try {
+      const res    = await fetch(CHAT_API, { method: "POST", body: fd });
+      const reader = res.body.getReader();
+      const dec    = new TextDecoder();
+      let txt = "", first = true;
 
-    item.appendChild(btn);
-    d.appendChild(item);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (first) { bubble.innerHTML = ""; first = false; }
+        txt += dec.decode(value);
+
+        const { cleaned, sources } = extractSources(txt);
+        let html = marked.parse(cleaned);
+
+        if (sources.length) {
+          html += `<div class="sources-block">
+            <div class="sources-label">Sources</div>
+            ${sources.map(s => `
+              <span class="source-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                ${esc(s)}
+              </span>`).join("")}
+          </div>`;
+        }
+
+        bubble.innerHTML = html;
+        document.querySelectorAll("pre code").forEach(el => hljs.highlightElement(el));
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      if (first) {
+        bubble.innerHTML = `<em style="color:var(--gray-mid)">No answer found in the uploaded documents. Please rephrase or contact HR directly.</em>`;
+      }
+    } catch {
+      bubble.innerHTML = `<em style="color:var(--peach)">Connection error. Please check the server and try again.</em>`;
+    }
+
+    sendBtn.disabled = false;
+  }
+
+  inputEl.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   });
-}
-
-async function deleteDoc(id) {
-  if (!confirm("Delete this document?")) return;
-  await fetch(`${DOCS_API}/${id}`, { method: "DELETE" });
-  loadDocs();
-}
-
-loadDocs();
-
 </script>
 </body>
 </html>
