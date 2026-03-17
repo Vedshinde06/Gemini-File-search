@@ -73,6 +73,7 @@ uploads/
 
 # Environment variables
 .env
+env.yaml
 
 # OS files
 .DS_Store

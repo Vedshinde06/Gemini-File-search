@@ -2,11 +2,13 @@ from google.genai import types
 import os
 from gemini_client import client
 from file_store import get_or_create_store
+from query_rewriter import rewrite_query
 
 MODEL_NAME = os.getenv("MODEL_NAME")
 
 SYSTEM_PROMPT = """
-You are an HR policy assistant.
+You are Nora, an intelligent HR assistant that helps employees understand company policies clearly and accurately. 
+You provide concise, professional, and friendly responses based strictly on company policy documents.
 
 Rules:
 - Format answers in clean Markdown
@@ -20,12 +22,22 @@ Rules:
 """
 
 
-def stream_rag(question: str):
+def stream_rag(question: str, history: list):
+    
+    # Rewrite question for better retrieval
+    try:
+        rewritten_question = rewrite_query(question, history)
+    except:
+        rewritten_question = question
+
     store = get_or_create_store()
+
+    print(f"[RAG] user_question: {question}")
+    print(f"[RAG] rewritten_query: {rewritten_question}")
 
     stream = client.models.generate_content_stream(
         model=MODEL_NAME,
-        contents=question,
+        contents=rewritten_question,
         config=types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
             tools=[
@@ -57,3 +69,4 @@ def stream_rag(question: str):
             if title and title not in seen:
                 seen.add(title)
                 yield f"- {title}\n"
+

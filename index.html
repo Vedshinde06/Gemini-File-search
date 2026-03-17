@@ -516,14 +516,17 @@
 <body>
 
 <div class="topbar">
+  <a href="/" class="logo-link">
   <img src="/static/padcare-logo.png" alt="PadCare Labs" class="topbar-logo" />
+  </a>
   <div class="topbar-divider"></div>
-  <span class="topbar-title">HR Policy Assistant</span>
+  <span class="topbar-title">HR Assistant</span>
   <div class="topbar-live">
     <span class="dot"></span>
     Online
   </div>
-  <!-- <a href="/admin" class="admin-link">Admin Panel →</a> -->
+  <a href="/admin" class="admin-link">Admin Panel →</a>
+  <a href="/logout" class="admin-link">Logout</a>
 </div>
 
 <div class="main">
@@ -535,9 +538,9 @@
         <div class="ob-header">
           <div class="ob-tag">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            HR Policy AI
+            HR AI
           </div>
-          <h1 class="ob-title">Your official HR policy<br>assistant at PadCare Labs.</h1>
+          <h1 class="ob-title">Hii, I Am Nora.<br> Your HR assistant at PadCare Labs.</h1>
           <p class="ob-subtitle">Ask any HR policy question and get accurate, document-grounded answers instantly. All responses come directly from official HR documents.</p>
         </div>
 
@@ -627,6 +630,11 @@
 <script>
   const CHAT_API = "/chat-stream";
 
+  const sessionId =
+    localStorage.getItem("chat_session") || crypto.randomUUID();
+
+  localStorage.setItem("chat_session", sessionId);
+
   const messagesEl = document.getElementById("messages");
   const inputEl    = document.getElementById("q");
   const sendBtn    = document.getElementById("sendBtn");
@@ -696,6 +704,7 @@
 
     const bubble = addBot();
     const fd = new FormData();
+    fd.append("session_id", sessionId);
     fd.append("question", q);
 
     try {
