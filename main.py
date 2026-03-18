@@ -163,14 +163,58 @@ def serve_ui(request: Request):
     return FileResponse(os.path.join(BASE_DIR, "index.html"))
     
 
+from fastapi.responses import HTMLResponse
+
 @app.get("/admin")
 def serve_admin(request: Request):
-
     try:
         require_admin(request)
     except:
-        return RedirectResponse("/login-page")
-
+        # Check if logged in at all
+        user = request.session.get("user")
+        if not user:
+            return RedirectResponse("/login-page")
+        # Logged in but not admin → friendly page
+        return HTMLResponse("""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Access Denied — PadCare Labs</title>
+          <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+          <style>
+            body { margin:0; font-family:'Sora',sans-serif; background:#FFF6EA;
+                   display:flex; align-items:center; justify-content:center; min-height:100vh; }
+            .card { text-align:center; padding:48px 40px; background:#FCF8E6;
+                    border:1px solid #CFCFCF; border-radius:18px; max-width:400px; width:90%; }
+            .icon { width:64px; height:64px; border-radius:50%; background:rgba(201,22,26,0.09);
+                    border:1px solid rgba(201,22,26,0.2); display:flex; align-items:center;
+                    justify-content:center; margin:0 auto 20px; }
+            .icon svg { width:28px; height:28px; stroke:#C9161A; }
+            h1 { font-size:20px; font-weight:600; color:#AB0106; margin:0 0 8px; }
+            p  { font-size:13.5px; color:#666666; line-height:1.65; margin:0 0 28px; }
+            a  { display:inline-block; padding:11px 28px; background:#C9161A; color:#FFF6EA;
+                 border-radius:10px; font-size:13px; font-weight:600; text-decoration:none;
+                 transition:background 0.18s; }
+            a:hover { background:#AB0106; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <h1>Access Not Allowed</h1>
+            <p>You don't have permission to view the admin panel.<br>Please contact your HR administrator if you think this is a mistake.</p>
+            <a href="/">← Back to Assistant</a>
+          </div>
+        </body>
+        </html>
+        """, status_code=403)
     return FileResponse(os.path.join(BASE_DIR, "admin.html"))
 
 if __name__ == "__main__":
@@ -185,8 +229,6 @@ async def login(request: Request):
 
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
-
-from fastapi.responses import RedirectResponse
 
 import httpx
 from fastapi.responses import RedirectResponse
@@ -237,3 +279,18 @@ def logout(request: Request):
     request.session.clear()
 
     return RedirectResponse("/login-page")
+
+@app.get("/me")
+def get_user(request: Request):
+    user = request.session.get("user")
+
+    if not user:
+        return {}
+
+    from auth import ADMIN_EMAILS
+
+    return {
+        "name": user.get("name", ""),
+        "email": user.get("email", ""),
+        "is_admin": user.get("email") in ADMIN_EMAILS
+    }

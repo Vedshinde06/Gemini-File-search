@@ -511,6 +511,209 @@
       color: var(--gray-light);
       text-align: center;
     }
+
+    .user-menu {
+      position: relative;
+      margin-left: 18px;
+    }
+
+    .avatar-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,246,234,0.35);
+      background: rgba(255,246,234,0.12);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .avatar-btn:hover {
+      background: rgba(255,246,234,0.22);
+      border-color: rgba(255,246,234,0.6);
+      box-shadow: 0 0 0 3px rgba(255,246,234,0.1);
+    }
+
+    .avatar-btn svg { width: 18px; height: 18px; }
+
+    .status-dot {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 2px solid var(--red);
+    }
+
+    .dropdown {
+      position: absolute;
+      right: 0; top: 48px;
+      width: 272px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.13);
+      opacity: 0;
+      transform: translateY(8px) scale(0.97);
+      pointer-events: none;
+      transition: all 0.2s cubic-bezier(.4,0,.2,1);
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .dropdown.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .dropdown-header {
+      background: var(--red);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar-large {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(255,246,234,0.18);
+      border: 2px solid rgba(255,246,234,0.3);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .avatar-large svg { width: 22px; height: 22px; }
+
+    .user-info { flex: 1; min-width: 0; }
+
+    .user-name {
+      font-size: 14px; font-weight: 600; color: var(--cream);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .user-email {
+      font-size: 11.5px; color: rgba(255,246,234,0.65); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .user-badge {
+      margin-top: 5px;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px;
+      background: rgba(239,193,71,0.22);
+      border: 1px solid rgba(239,193,71,0.4);
+      border-radius: 20px;
+      font-size: 10px; color: var(--gold); font-weight: 600; letter-spacing: 0.4px;
+    }
+
+    .dropdown-section { padding: 8px; }
+
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer; text-decoration: none;
+      color: var(--text); font-size: 13px; font-weight: 500;
+      transition: background 0.15s;
+    }
+
+    .dropdown-item:hover { background: var(--red-glow); color: var(--red-deep); }
+
+    .item-icon {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      background: rgba(207,207,207,0.2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.15s;
+    }
+
+    .dropdown-item:hover .item-icon { background: rgba(201,22,26,0.1); }
+    .item-icon svg { width: 14px; height: 14px; stroke: var(--gray-mid); transition: stroke 0.15s; }
+    .dropdown-item:hover .item-icon svg { stroke: var(--red); }
+
+    .item-label { flex: 1; }
+
+    .item-tag {
+      font-size: 10px; padding: 2px 7px;
+      border-radius: 20px;
+      background: rgba(201,22,26,0.1);
+      color: var(--red-deep); font-weight: 600;
+    }
+
+    .dropdown-divider { height: 1px; background: var(--border-soft); margin: 2px 8px; }
+
+    .danger-item { color: var(--red) !important; }
+    .danger-item .item-icon { background: rgba(201,22,26,0.08) !important; }
+    .danger-item .item-icon svg { stroke: var(--red) !important; }
+    .danger-item:hover { background: rgba(201,22,26,0.08) !important; }
+
+    /* ── ACCESS DENIED TOAST ─────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1c1c1c;
+      color: var(--cream);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 20px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.28s cubic-bezier(.4,0,.2,1);
+      z-index: 9999;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast-icon {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: rgba(201,22,26,0.18);
+      border: 1px solid rgba(201,22,26,0.35);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .toast-icon svg { width: 13px; height: 13px; stroke: var(--red); }
+
+    .toast-text { flex: 1; }
+    .toast-title { color: var(--cream); font-weight: 600; font-size: 13px; }
+    .toast-sub { color: var(--gray-light); font-size: 11.5px; margin-top: 1px; }
+
+    .toast-bar {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px;
+      background: var(--red);
+      border-radius: 0 0 12px 12px;
+      width: 100%;
+      transform-origin: left;
+      animation: none;
+    }
+
+    .toast.show .toast-bar {
+      animation: drainBar 3s linear forwards;
+    }
+
+    @keyframes drainBar {
+      from { transform: scaleX(1); }
+      to   { transform: scaleX(0); }
+    }
   </style>
 </head>
 <body>
@@ -520,13 +723,78 @@
   <img src="/static/padcare-logo.png" alt="PadCare Labs" class="topbar-logo" />
   </a>
   <div class="topbar-divider"></div>
-  <span class="topbar-title">HR Assistant</span>
+  <span class="topbar-title">AI Assistant</span>
   <div class="topbar-live">
     <span class="dot"></span>
     Online
   </div>
-  <a href="/admin" class="admin-link">Admin Panel →</a>
-  <a href="/logout" class="admin-link">Logout</a>
+  <div class="user-menu" id="userMenu">
+  <div class="avatar-btn" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,246,234,0.9)"
+         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+    <span class="status-dot"></span>
+  </div>
+
+  <div class="dropdown" id="dropdown">
+    <div class="dropdown-header">
+      <div class="avatar-large">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,246,234,0.85)"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div class="user-info">
+        <div class="user-name" id="fullName"></div>
+        <div class="user-email" id="email"></div>
+        <div class="user-badge" id="adminBadge" style="display:none;">
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Admin
+        </div>
+      </div>
+    </div>
+
+    <div class="dropdown-section">
+      <a href="/admin" class="dropdown-item" id="adminBtn">
+        <div class="item-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <span class="item-label">Admin panel</span>
+        <span class="item-tag">Admin</span>
+      </a>
+    </div>
+
+    <div class="dropdown-divider"></div>
+
+    <div class="dropdown-section">
+      <a href="/logout" class="dropdown-item danger-item">
+        <div class="item-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </div>
+        <span class="item-label">Sign out</span>
+      </a>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<div class="toast" id="accessToast">
+  <div class="toast-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+  </div>
+  <div class="toast-text">
+    <div class="toast-title">Access not allowed</div>
+    <div class="toast-sub">You don't have admin privileges.</div>
+  </div>
+  <div class="toast-bar"></div>
 </div>
 
 <div class="main">
@@ -536,11 +804,7 @@
       <div id="onboarding">
 
         <div class="ob-header">
-          <div class="ob-tag">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            HR AI
-          </div>
-          <h1 class="ob-title">Hii, I Am Nora.<br> Your HR assistant at PadCare Labs.</h1>
+          <h1 class="ob-title">Hey, I Am Nora.<br> Your AI assistant at PadCare Labs.</h1>
           <p class="ob-subtitle">Ask any HR policy question and get accurate, document-grounded answers instantly. All responses come directly from official HR documents.</p>
         </div>
 
@@ -621,7 +885,7 @@
           </svg>
         </button>
       </div>
-      <div class="input-hint">Answers are based solely on official PadCare Labs HR documents.</div>
+      <div class="input-hint">Responses are AI-generated and for guidance only. Please verify before use.</div>
     </div>
 
   </div>
@@ -751,6 +1015,54 @@
   inputEl.addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   });
+
+ 
+    async function loadUser() {
+      const res = await fetch("/me");
+      const user = await res.json();
+
+      const name = user.name || "User";
+      const email = user.email || "";
+
+      document.getElementById("fullName").innerText = name;
+      document.getElementById("email").innerText = email;
+
+      // initials
+      const initials = name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
+      document.getElementById("avatar").innerText = initials;
+      document.getElementById("avatarBig").innerText = initials;
+
+      // admin control
+      if (!user.is_admin) {
+        document.getElementById("adminBtn").style.display = "none";
+      }
+
+      if (!user.is_admin) {
+        document.getElementById("adminBtn").style.display = "none";
+        // Extra safety: intercept direct clicks if button ever renders
+        document.getElementById("adminBtn").addEventListener("click", (e) => {
+          e.preventDefault();
+          showAccessDenied();
+        });
+      } else {
+        document.getElementById("adminBadge").style.display = "inline-flex";
+      }
+    }
+
+    function toggleMenu() {
+      document.getElementById("dropdown").classList.toggle("show");
+    }
+
+    // close on outside click
+    document.addEventListener("click", (e) => {
+      const menu = document.getElementById("userMenu");
+      if (!menu.contains(e.target)) {
+        document.getElementById("dropdown").classList.remove("show");
+      }
+    });
+
+    loadUser();
+
 </script>
 </body>
 </html>
