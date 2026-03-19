@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, UploadFile, File, Form, Request
+from fastapi import FastAPI, UploadFile, File, Form, Request, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,6 +11,10 @@ from starlette.middleware.sessions import SessionMiddleware
 import uvicorn
 from fastapi.responses import RedirectResponse
 from auth import require_login, require_admin
+from db import save_doc
+from authlib.integrations.starlette_client import OAuth
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from dotenv import load_dotenv
 
@@ -26,7 +30,6 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI()
 
-from starlette.middleware.sessions import SessionMiddleware
 
 app.add_middleware(
     SessionMiddleware,
@@ -37,7 +40,6 @@ app.add_middleware(
     max_age=86400
 )
 
-from authlib.integrations.starlette_client import OAuth
 
 oauth = OAuth()
 
@@ -111,19 +113,35 @@ async def list_docs(request: Request):
 # ---------- ADMIN: Upload ----------
 
 @app.post("/admin/upload")
-async def upload_docs(request: Request, files: List[UploadFile] = File(...)):
-
+async def upload_docs(
+    request: Request,
+    files: List[UploadFile] = File(...),
+    drive_links: List[str] = Form(...)
+):
     require_admin(request)
+
+    if len(files) != len(drive_links):
+        raise HTTPException(status_code=400, detail="Each file must have exactly one Drive link.")
 
     results = []
 
-    for file in files:
+    for file, link in zip(files, drive_links):
+        clean_link = link.strip()
+
+        if not clean_link:
+            raise HTTPException(status_code=400, detail=f"Drive link missing for {file.filename}.")
+
         file_path = os.path.join(UPLOAD_DIR, file.filename)
 
         with open(file_path, "wb") as f:
             f.write(await file.read())
 
+        # Upload to Gemini
         res = upload_file_to_store(file_path)
+
+        # Save Drive link in Firestore
+        save_doc(file.filename, clean_link)
+
         results.append(res)
 
     return {"uploaded": results}
@@ -147,8 +165,6 @@ async def delete_doc(request: Request, doc_id: str):
     return {"status": "deleted", "doc": doc_id}
     
 
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 
 app.mount("/static", StaticFiles(directory="."), name="static")
 

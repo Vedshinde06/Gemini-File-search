@@ -7,7 +7,7 @@ from query_rewriter import rewrite_query
 MODEL_NAME = os.getenv("MODEL_NAME")
 
 SYSTEM_PROMPT = """
-You are Nora, an intelligent HR assistant that helps employees understand company policies clearly and accurately. 
+You are Ved, an intelligent HR assistant that helps employees understand company policies clearly and accurately. 
 You provide concise, professional, and friendly responses based strictly on company policy documents.
 
 Rules:
@@ -68,5 +68,14 @@ def stream_rag(question: str, history: list):
             title = getattr(gc.retrieved_context, "title", None)
             if title and title not in seen:
                 seen.add(title)
-                yield f"- {title}\n"
+                from db import get_all_links
+
+                doc_links = get_all_links()
+
+                drive_url = doc_links.get(title)
+
+                if drive_url:
+                    yield f"- [{title}]({drive_url})\n"
+                else:
+                    yield f"- {title}\n"
 

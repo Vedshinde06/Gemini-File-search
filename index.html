@@ -300,9 +300,15 @@
       border-radius: 20px;
       font-size: 11.5px;
       color: var(--red-deep);
+      text-decoration: none;
     }
 
     .source-chip svg { width: 11px; height: 11px; }
+
+    .source-chip:hover {
+      border-color: rgba(201,22,26,0.3);
+      background: rgba(201,22,26,0.14);
+    }
 
     /* Typing dots */
     .typing { display: flex; gap: 5px; align-items: center; padding: 5px 2px; }
@@ -723,7 +729,7 @@
   <img src="/static/padcare-logo.png" alt="PadCare Labs" class="topbar-logo" />
   </a>
   <div class="topbar-divider"></div>
-  <span class="topbar-title">AI Assistant</span>
+  <span class="topbar-title"></span>
   <div class="topbar-live">
     <span class="dot"></span>
     Online
@@ -804,7 +810,7 @@
       <div id="onboarding">
 
         <div class="ob-header">
-          <h1 class="ob-title">Hey, I Am Nora.<br> Your AI assistant at PadCare Labs.</h1>
+          <h1 class="ob-title">Hey, I Am Ved.</h1>
           <p class="ob-subtitle">Ask any HR policy question and get accurate, document-grounded answers instantly. All responses come directly from official HR documents.</p>
         </div>
 
@@ -815,11 +821,10 @@
             </div>
             <h4>What I can help with</h4>
             <ul>
-              <li>Leave policies &amp; eligibility rules</li>
-              <li>Leave carry forward rules</li>
-              <li>Company holidays &amp; calendar</li>
-              <li>Leave encashment process</li>
-              <li>HR policy clarifications</li>
+              <li>Answer questions using official Padcare policies</li>
+              <li>Simplify policies, rules, and eligibility</li>
+              <li>Help you quickly find relevant information</li>
+              <li>Provide accurate &amp; consistent responses</li>
             </ul>
           </div>
 
@@ -885,7 +890,7 @@
           </svg>
         </button>
       </div>
-      <div class="input-hint">Responses are AI-generated and for guidance only. Please verify before use.</div>
+      <div class="input-hint">Responses are AI-generated based on company policies and documents. For guidance only - please verify before use.</div>
     </div>
 
   </div>
@@ -959,6 +964,16 @@
     return { cleaned: clean.join("\n"), sources: srcs };
   }
 
+  function parseSource(source) {
+    const markdownLink = source.match(/^\[(.+)\]\((https?:\/\/[^\s)]+)\)$/i);
+
+    if (markdownLink) {
+      return { label: markdownLink[1], url: markdownLink[2] };
+    }
+
+    return { label: source, url: null };
+  }
+
   async function send() {
     const q = inputEl.value.trim();
     if (!q) return;
@@ -989,11 +1004,18 @@
         if (sources.length) {
           html += `<div class="sources-block">
             <div class="sources-label">Sources</div>
-            ${sources.map(s => `
-              <span class="source-chip">
+            ${sources.map(s => {
+              const source = parseSource(s);
+              const content = `
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                ${esc(s)}
-              </span>`).join("")}
+                ${esc(source.label)}`;
+
+              if (source.url) {
+                return `<a class="source-chip" href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">${content}</a>`;
+              }
+
+              return `<span class="source-chip">${content}</span>`;
+            }).join("")}
           </div>`;
         }
 
