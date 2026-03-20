@@ -67,27 +67,40 @@ async def warmup():
 
 # ---------- CHAT STREAM ----------
 chat_sessions = {}
+MAX_HISTORY_MESSAGES = 12
 
 @app.post("/chat-stream")
 async def chat_stream(request: Request, session_id: str = Form(...), question: str = Form(...)):
 
     require_login(request)
 
-    history = chat_sessions.get(session_id, [])
+    history = list(chat_sessions.get(session_id, []))
 
     history.append({
         "role": "user",
         "content": question
     })
 
-    chat_sessions[session_id] = history
+    chat_sessions[session_id] = history[-MAX_HISTORY_MESSAGES:]
 
     def generator():
+        response_parts = []
         try:
             for token in stream_rag(question, history):
+                response_parts.append(token)
                 yield token
         except Exception as e:
             yield f"\n[ERROR] {str(e)}"
+            return
+
+        answer_text = "".join(response_parts).strip()
+        if answer_text:
+            updated_history = list(chat_sessions.get(session_id, []))
+            updated_history.append({
+                "role": "assistant",
+                "content": answer_text
+            })
+            chat_sessions[session_id] = updated_history[-MAX_HISTORY_MESSAGES:]
 
     return StreamingResponse(generator(), media_type="text/plain")
 

@@ -3,16 +3,24 @@ import time
 from gemini_client import client
 
 STORE_DISPLAY_NAME = os.getenv("FILE_SEARCH_STORE_NAME")
+_cached_store = None
 
 
 def get_or_create_store():
+    global _cached_store
+
+    if _cached_store is not None:
+        return _cached_store
+
     for store in client.file_search_stores.list():
         if STORE_DISPLAY_NAME in store.display_name:
+            _cached_store = store
             return store
 
-    return client.file_search_stores.create(
+    _cached_store = client.file_search_stores.create(
         config={"display_name": STORE_DISPLAY_NAME}
     )
+    return _cached_store
 
 
 def upload_file_to_store(file_path: str):

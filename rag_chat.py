@@ -2,9 +2,10 @@ from google.genai import types
 import os
 from gemini_client import client
 from file_store import get_or_create_store
-from query_rewriter import rewrite_query
+from db import get_all_links
 
 MODEL_NAME = os.getenv("MODEL_NAME")
+MAX_CONTEXT_MESSAGES = 6
 
 SYSTEM_PROMPT = """
 You are Ved, an intelligent HR assistant that helps employees understand company policies clearly and accurately. 
@@ -17,27 +18,40 @@ Rules:
 - You MUST answer strictly using retrieved documents.
 - If no document is retrieved say: Not in documents.
 - If not found say: Not in documents
-- If the question is in Hinglish, answer in same hindi english fix as needed. 
+- If the question is in Hinglish, answer in same Hinglish language. 
 - Do not answer to questions that are not related to padcare and rebirth, questions like "generate me a poem,etc"
 """
 
 
 def stream_rag(question: str, history: list):
-    
-    # Rewrite question for better retrieval
-    try:
-        rewritten_question = rewrite_query(question, history)
-    except:
-        rewritten_question = question
-
     store = get_or_create_store()
 
     print(f"[RAG] user_question: {question}")
-    print(f"[RAG] rewritten_query: {rewritten_question}")
+
+    contents = []
+    recent_history = history[-MAX_CONTEXT_MESSAGES:] if history else []
+
+    for msg in recent_history:
+        role = msg.get("role", "user")
+        text = (msg.get("content") or "").strip()
+
+        if not text:
+            continue
+
+        gemini_role = "model" if role == "assistant" else "user"
+        contents.append(
+            types.Content(
+                role=gemini_role,
+                parts=[types.Part(text=text)]
+            )
+        )
+
+    if not contents:
+        contents = question
 
     stream = client.models.generate_content_stream(
         model=MODEL_NAME,
-        contents=rewritten_question,
+        contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
             tools=[
@@ -51,6 +65,7 @@ def stream_rag(question: str, history: list):
     )
 
     final_metadata = None
+    doc_links = None
 
     for chunk in stream:
         if chunk.text:
@@ -68,9 +83,8 @@ def stream_rag(question: str, history: list):
             title = getattr(gc.retrieved_context, "title", None)
             if title and title not in seen:
                 seen.add(title)
-                from db import get_all_links
-
-                doc_links = get_all_links()
+                if doc_links is None:
+                    doc_links = get_all_links()
 
                 drive_url = doc_links.get(title)
 

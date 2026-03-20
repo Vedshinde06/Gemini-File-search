@@ -1049,26 +1049,27 @@
       document.getElementById("fullName").innerText = name;
       document.getElementById("email").innerText = email;
 
-      // initials
-      const initials = name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
-      document.getElementById("avatar").innerText = initials;
-      document.getElementById("avatarBig").innerText = initials;
-
-      // admin control
-      if (!user.is_admin) {
-        document.getElementById("adminBtn").style.display = "none";
-      }
+      const adminBtn = document.getElementById("adminBtn");
 
       if (!user.is_admin) {
-        document.getElementById("adminBtn").style.display = "none";
-        // Extra safety: intercept direct clicks if button ever renders
-        document.getElementById("adminBtn").addEventListener("click", (e) => {
+        adminBtn.style.display = "none";
+        adminBtn.addEventListener("click", (e) => {
           e.preventDefault();
-          showAccessDenied();
+          showAccessDeniedToast();
         });
       } else {
         document.getElementById("adminBadge").style.display = "inline-flex";
       }
+    }
+
+    function showAccessDeniedToast() {
+      const toast = document.getElementById("accessToast");
+      toast.classList.add("show");
+
+      clearTimeout(showAccessDeniedToast.timeoutId);
+      showAccessDeniedToast.timeoutId = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
     }
 
     function toggleMenu() {
