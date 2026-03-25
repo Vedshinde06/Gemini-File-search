@@ -82,9 +82,6 @@ Thumbs.db
 # Log files
 *.log
 
-# HTML output
-*.html
-
 # Backup files
 *~
 *.bak

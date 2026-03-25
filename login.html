@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — PadCare HR Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ══════════════════════════════════════
+       RESET & VARIABLES
+    ══════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:       #C9161A;
+      --red-dark:  #AB0106;
+      --cream:     #FFF6EA;
+      --cream2:    #FCF8E6;
+      --gray-line: #CFCFCF;
+      --gray-text: #666666;
+      --peach:     #E68B7C;
+      --gold:      #EFC147;
+      --pink:      #EDA1B0;
+      --green:     #0E4B07;
+      --white:     #FFFFFF;
+      --shadow-md: 0 6px 28px rgba(201,22,26,0.11), 0 2px 8px rgba(0,0,0,0.05);
+      --t:         0.28s cubic-bezier(.4,0,.2,1);
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(145deg, var(--cream) 0%, var(--cream2) 60%, #FDF3DC 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient orbs */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse at 15% 20%, rgba(201,22,26,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 80%, rgba(239,193,71,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 15%, rgba(237,161,176,0.04) 0%, transparent 40%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ══════════════════════════════════════
+       CARD
+    ══════════════════════════════════════ */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: var(--shadow-md);
+      padding: 44px 40px 40px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      overflow: hidden;
+      animation: cardIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Rainbow top border */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3.5px;
+      background: linear-gradient(90deg, var(--red), var(--peach), var(--gold), var(--pink));
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ══════════════════════════════════════
+       LOGO
+    ══════════════════════════════════════ */
+    .logo-wrap {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: center;
+    }
+    .logo-wrap img {
+      display: block;
+      max-width: min(100%, 220px);
+      max-height: 64px;
+      height: auto;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(201,22,26,0.15));
+    }
+    .logo-fallback {
+      display: none;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--red);
+    }
+
+    /* ══════════════════════════════════════
+       DIVIDER
+    ══════════════════════════════════════ */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--gray-line);
+      margin: 22px 0;
+    }
+
+    /* ══════════════════════════════════════
+       TYPOGRAPHY
+    ══════════════════════════════════════ */
+    .eyebrow {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: #0f0f0f;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 0.88rem;
+      color: var(--gray-text);
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    /* ══════════════════════════════════════
+       FEATURE PILLS
+    ══════════════════════════════════════ */
+    .pills {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 18px 0 0;
+    }
+    .pill {
+      background: var(--cream);
+      border: 1.5px solid rgba(201,22,26,0.12);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: 0.67rem;
+      font-weight: 600;
+      color: var(--gray-text);
+      letter-spacing: 0.3px;
+    }
+
+    /* ══════════════════════════════════════
+       GOOGLE LOGIN BUTTON
+    ══════════════════════════════════════ */
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 18px rgba(201,22,26,0.32);
+      transition: all var(--t);
+      letter-spacing: 0.2px;
+      margin-top: 24px;
+    }
+    .btn-google:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 26px rgba(171,1,6,0.42);
+    }
+    .btn-google:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(201,22,26,0.2);
+    }
+
+    /* Google G SVG icon */
+    .g-icon {
+      width: 18px; height: 18px;
+      background: var(--white);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .g-icon svg { width: 11px; height: 11px; }
+
+    /* ══════════════════════════════════════
+       FOOTER NOTE
+    ══════════════════════════════════════ */
+    .footer-note {
+      margin-top: 20px;
+      font-size: 0.72rem;
+      color: var(--gray-text);
+      line-height: 1.6;
+    }
+    .footer-note a {
+      color: var(--red);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer-note a:hover { text-decoration: underline; }
+
+    /* Security badge row */
+    .security-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 16px;
+      font-size: 0.68rem;
+      color: var(--gray-text);
+      font-weight: 500;
+    }
+    .security-dot {
+      width: 5px; height: 5px;
+      background: var(--green);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media (max-width: 480px) {
+      body {
+        padding: 14px;
+        align-items: stretch;
+      }
+
+      .card {
+        margin: auto 0;
+        padding: 32px 20px 28px;
+        border-radius: 16px;
+      }
+
+      .logo-wrap {
+        margin-bottom: 18px;
+      }
+
+      .logo-wrap img {
+        max-width: min(100%, 180px);
+        max-height: 56px;
+      }
+
+      h1 {
+        font-size: 1.35rem;
+      }
+
+      .subtitle,
+      .footer-note,
+      .security-row {
+        font-size: 0.78rem;
+      }
+
+      .btn-google {
+        padding: 13px 18px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <img src="/static/Grey Logo.png" alt="PadCare Logo"
+      onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <div class="logo-fallback">PadCare</div>
+  </div>
+
+  <!-- Heading -->
+  <h1>AI Assistant</h1>
+  <p class="subtitle">Sign in with your company account to access the Assistant.</p>
+
+
+
+  <hr class="divider" />
+
+  <!-- Google Login Button -->
+  <a href="/login" class="btn-google">
+    <span class="g-icon">
+      <!-- Google G mark -->
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+    </span>
+    Continue with Google
+  </a>
+
+  <!-- Security note -->
+  <div class="security-row">
+    <span class="security-dot"></span>
+    Secured by Google OAuth 2.0 — company accounts only
+  </div>
+
+
+</div>
+
+</body>
+</html>
