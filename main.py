@@ -1,7 +1,9 @@
 import os
+import httpx
 from fastapi import FastAPI, UploadFile, File, Form, Request, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from gemini_client import client
 from file_store import upload_file_to_store, get_or_create_store
@@ -22,6 +24,7 @@ load_dotenv()
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+FEEDBACK_WEBHOOK_URL = os.getenv("FEEDBACK_WEBHOOK_URL", "").strip()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -69,6 +72,10 @@ async def warmup():
 chat_sessions = {}
 MAX_HISTORY_MESSAGES = 12
 
+
+class FeedbackPayload(BaseModel):
+    feedback: str
+
 @app.post("/chat-stream")
 async def chat_stream(request: Request, session_id: str = Form(...), question: str = Form(...)):
 
@@ -103,6 +110,64 @@ async def chat_stream(request: Request, session_id: str = Form(...), question: s
             chat_sessions[session_id] = updated_history[-MAX_HISTORY_MESSAGES:]
 
     return StreamingResponse(generator(), media_type="text/plain")
+
+
+@app.post("/feedback")
+async def submit_feedback(request: Request, payload: FeedbackPayload):
+    user = require_login(request)
+
+    feedback = payload.feedback.strip()
+
+    if not feedback:
+        raise HTTPException(status_code=400, detail="Feedback cannot be empty.")
+
+    if len(feedback) > 2000:
+        raise HTTPException(status_code=400, detail="Feedback is too long.")
+
+    if not FEEDBACK_WEBHOOK_URL:
+        raise HTTPException(status_code=500, detail="Feedback webhook is not configured.")
+
+    try:
+        async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+            response = await client.post(
+                FEEDBACK_WEBHOOK_URL,
+                json={
+                    "username": user["email"],
+                    "feedback": feedback,
+                },
+                headers={
+                    "Accept": "application/json",
+                },
+            )
+            response_text = response.text.strip()
+
+            if response.status_code >= 400:
+                print(f"[FEEDBACK] webhook_error status={response.status_code} body={response_text}")
+                raise HTTPException(status_code=500, detail="Feedback webhook returned an error.")
+
+            data = {}
+            if response_text:
+                try:
+                    import json as _json
+                    data = _json.loads(response_text)
+                except Exception:
+                    print(f"[FEEDBACK] non_json_response status={response.status_code} body={response_text[:200]}")
+                    if response.status_code < 300:
+                        pass  # Apps Script redirect returned HTML — still a success
+                    else:
+                        raise HTTPException(status_code=500, detail="Feedback webhook returned an invalid response.")
+
+            if data and data.get("ok") is False:
+                error_message = data.get("error") or "Feedback webhook reported a failure."
+                print(f"[FEEDBACK] webhook_rejected error={error_message}")
+                raise HTTPException(status_code=500, detail=error_message)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"[FEEDBACK] request_failed error={exc}")
+        raise HTTPException(status_code=500, detail="Could not save feedback right now.") from exc
+
+    return {"status": "saved"}
 
 # ---------- ADMIN: LIST DOCS ----------
 
@@ -257,9 +322,6 @@ async def login(request: Request):
     redirect_uri = request.url_for("auth").replace(scheme="https")
 
     return await oauth.google.authorize_redirect(request, redirect_uri)
-
-
-import httpx
 from fastapi.responses import RedirectResponse
 
 @app.get("/auth")

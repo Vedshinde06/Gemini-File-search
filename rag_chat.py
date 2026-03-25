@@ -18,8 +18,9 @@ Rules:
 - You MUST answer strictly using retrieved documents.
 - If no document is retrieved say: Not in documents.
 - If not found say: Not in documents
-- If the question is in Hinglish, answer in same Hinglish language. 
+- If the question is in Hinglish, then only answer in same Hinglish language. Else answer in English. 
 - Do not answer to questions that are not related to padcare and rebirth, questions like "generate me a poem,etc"
+- Do not include a Source, Sources, References, or Documents section in the answer. The application adds sources separately.
 """
 
 
@@ -76,7 +77,7 @@ def stream_rag(question: str, history: list):
 
     # ---- AFTER STREAM ENDS ----
     if final_metadata and final_metadata.grounding_chunks:
-        yield "\n\n---\n**Sources:**\n"
+        yield "\n\n\nSources:\n"
 
         seen = set()
         for gc in final_metadata.grounding_chunks:
@@ -92,4 +93,3 @@ def stream_rag(question: str, history: list):
                     yield f"- [{title}]({drive_url})\n"
                 else:
                     yield f"- {title}\n"
-
